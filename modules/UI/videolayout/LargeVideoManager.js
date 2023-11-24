@@ -3,7 +3,7 @@
 import Logger from '@jitsi/logger';
 import $ from 'jquery';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nextProvider } from 'react-i18next';
 import { Provider } from 'react-redux';
 
@@ -164,8 +164,9 @@ export default class LargeVideoManager {
         }
 
         this.removePresenceLabel();
+        const dominantSpeakerRoot = createRoot(this._dominantSpeakerAvatarContainer);
 
-        ReactDOM.unmountComponentAtNode(this._dominantSpeakerAvatarContainer);
+        dominantSpeakerRoot.unmount();
 
         this.container.style.display = 'none';
     }
@@ -289,7 +290,7 @@ export default class LargeVideoManager {
 
             this.videoTrack?.jitsiTrack?.getVideoType() === VIDEO_TYPE.DESKTOP
                 && logger.debug(`Remote track ${videoTrack?.jitsiTrack}, isVideoMuted=${isVideoMuted},`
-                + ` streamingStatusActive=${streamingStatusActive}, isVideoRenderable=${isVideoRenderable}`);
+                    + ` streamingStatusActive=${streamingStatusActive}, isVideoRenderable=${isVideoRenderable}`);
 
             const isAudioOnly = APP.conference.isAudioOnly();
 
@@ -301,7 +302,7 @@ export default class LargeVideoManager {
 
             const showAvatar
                 = isVideoContainer
-                    && ((isAudioOnly && videoType !== VIDEO_TYPE.DESKTOP) || !isVideoRenderable || legacyScreenshare);
+                && ((isAudioOnly && videoType !== VIDEO_TYPE.DESKTOP) || !isVideoRenderable || legacyScreenshare);
 
             let promise;
 
@@ -317,7 +318,7 @@ export default class LargeVideoManager {
                 if ((!shouldDisplayTileView(state) || participant?.pinned) // In theory the tile view may not be
                 // enabled yet when we auto pin the participant.
 
-                        && participant && !participant.local && !participant.fakeParticipant) {
+                    && participant && !participant.local && !participant.fakeParticipant) {
                     // remote participant only
 
                     const track = getVideoTrackByParticipant(state, participant);
@@ -355,8 +356,8 @@ export default class LargeVideoManager {
             const overrideAndHide = APP.conference.isAudioOnly();
 
             this.updateParticipantConnStatusIndication(
-                    id,
-                    !overrideAndHide && messageKey);
+                id,
+                !overrideAndHide && messageKey);
 
             // Change the participant id the presence label is listening to.
             this.updatePresenceLabel(id);
@@ -506,15 +507,13 @@ export default class LargeVideoManager {
      * Updates the src of the dominant speaker avatar
      */
     updateAvatar() {
-        ReactDOM.render(
+        createRoot(this._dominantSpeakerAvatarContainer)?.render(
             <Provider store = { APP.store }>
                 <Avatar
                     id = "dominantSpeakerAvatar"
                     participantId = { this.id }
                     size = { 200 } />
-            </Provider>,
-            this._dominantSpeakerAvatarContainer
-        );
+            </Provider>);
     }
 
     /**
@@ -547,15 +546,14 @@ export default class LargeVideoManager {
         const presenceLabelContainer = document.getElementById('remotePresenceMessage');
 
         if (presenceLabelContainer) {
-            ReactDOM.render(
+            createRoot(presenceLabelContainer)?.render(
                 <Provider store = { APP.store }>
                     <I18nextProvider i18n = { i18next }>
                         <PresenceLabel
                             participantID = { id }
                             className = 'presence-label' />
                     </I18nextProvider>
-                </Provider>,
-                presenceLabelContainer);
+                </Provider>);
         }
     }
 
@@ -568,7 +566,9 @@ export default class LargeVideoManager {
         const presenceLabelContainer = document.getElementById('remotePresenceMessage');
 
         if (presenceLabelContainer) {
-            ReactDOM.unmountComponentAtNode(presenceLabelContainer);
+            const presenceRoot = createRoot(presenceLabelContainer);
+
+            presenceRoot.unmount();
         }
     }
 

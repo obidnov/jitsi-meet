@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createPortal } from 'react-dom';
 import { useSelector } from 'react-redux';
 
 import { IReduxState } from '../../../app/types';
@@ -114,7 +114,7 @@ function DialogPortal({ children, className, style, getRef, setSize, targetSelec
         };
     }, [ clientWidth ]);
 
-    return ReactDOM.createPortal(
+    return createPortal(
         children,
         portalTarget
     );

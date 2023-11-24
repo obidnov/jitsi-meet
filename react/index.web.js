@@ -1,7 +1,7 @@
 /* global APP */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { App } from './features/app/components/App.web';
 import { getLogger } from './features/base/logging/functions';
@@ -53,8 +53,7 @@ globalNS.renderEntryPoint = ({
     props = {},
     elementId = 'react'
 }) => {
-    ReactDOM.render(
-        <Component { ...props } />,
-        document.getElementById(elementId)
+    createRoot(document.getElementById(elementId)).render(
+        <Component { ...props } />
     );
 };
