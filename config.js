@@ -30,7 +30,8 @@ var config = {
 
     hosts: {
         // XMPP domain.
-        domain: 'jitsi-meet.example.com',
+        // domain: 'jitsi-meet.example.com',
+        domain: 'meet.jitsi',
 
         // When using authentication, domain for guest users.
         // anonymousdomain: 'guest.example.com',
@@ -42,17 +43,21 @@ var config = {
         // focus: 'focus.jitsi-meet.example.com',
 
         // XMPP MUC domain. FIXME: use XEP-0030 to discover it.
-        muc: 'conference.' + subdomain + 'jitsi-meet.example.com',
+        // muc: 'conference.' + subdomain + 'jitsi-meet.example.com',
+        muc: 'muc.meet.jitsi',
     },
 
     // BOSH URL. FIXME: use XEP-0156 to discover it.
-    bosh: 'https://jitsi-meet.example.com/' + subdir + 'http-bind',
+    // bosh: 'https://jitsi-meet.example.com/' + subdir + 'http-bind',
+    bosh: 'https://conf.boomstream.com/' + subdir + 'http-bind',
 
     // Websocket URL (XMPP)
     // websocket: 'wss://jitsi-meet.example.com/' + subdir + 'xmpp-websocket',
+    websocket: 'wss://conf.boomstream.com/' + subdir + 'xmpp-websocket',
 
     // Whether BOSH should be preferred over WebSocket if both are configured.
     // preferBosh: false,
+    preferBosh: false,
 
     // The real JID of focus participant - can be overridden here
     // Do not change username - FIXME: Make focus username configurable
@@ -117,16 +122,17 @@ var config = {
     // Disables self-view settings in UI
     // disableSelfViewSettings: false,
 
-    // screenshotCapture : {
+    screenshotCapture: {
     //      Enables the screensharing capture feature.
-    //      enabled: false,
+        enabled: false,
+
     //
     //      The mode for the screenshot capture feature.
     //      Can be either 'recording' - screensharing screenshots are taken
     //      only when the recording is also on,
     //      or 'always' - screensharing screenshots are always taken.
     //      mode: 'recording',
-    // }
+    },
 
     // Disables ICE/UDP by filtering out local and remote UDP candidates in
     // signalling.
@@ -318,21 +324,25 @@ var config = {
     //          'https://jitsi-meet.example.com/subfolder/static/oauth.html',
     // },
 
-    // recordingService: {
+    recordingService: {
     //     // When integrations like dropbox are enabled only that will be shown,
     //     // by enabling fileRecordingsServiceEnabled, we show both the integrations
     //     // and the generic recording service (its configuration and storage type
     //     // depends on jibri configuration)
     //     enabled: false,
+        enabled: true,
 
-    //     // Whether to show the possibility to share file recording with other people
-    //     // (e.g. meeting participants), based on the actual implementation
-    //     // on the backend.
-    //     sharingEnabled: false,
+        //     // Whether to show the possibility to share file recording with other people
+        //     // (e.g. meeting participants), based on the actual implementation
+        //     // on the backend.
+        //     sharingEnabled: false,
+        sharingEnabled: false,
 
-    //     // Hide the warning that says we only store the recording for 24 hours.
-    //     hideStorageWarning: false,
-    // },
+        //     // Hide the warning that says we only store the recording for 24 hours.
+        //     hideStorageWarning: false,
+        hideStorageWarning: false,
+    },
+    hiddenDomain: 'recorder.meet.jitsi',
 
     // DEPRECATED. Use recordingService.enabled instead.
     // fileRecordingsServiceEnabled: false,
@@ -341,16 +351,19 @@ var config = {
     // fileRecordingsServiceSharingEnabled: false,
 
     // Local recording configuration.
-    // localRecording: {
+    localRecording: {
     //     // Whether to disable local recording or not.
     //     disable: false,
+        disable: false,
 
-    //     // Whether to notify all participants when a participant is recording locally.
-    //     notifyAllParticipants: false,
+        //     // Whether to notify all participants when a participant is recording locally.
+        //     notifyAllParticipants: false,
+        notifyAllParticipants: false,
 
-    //     // Whether to disable the self recording feature (only local participant streams).
-    //     disableSelfRecording: false,
-    // },
+        //     // Whether to disable the self recording feature (only local participant streams).
+        //     disableSelfRecording: false,
+        disableSelfRecording: false,
+    },
 
     // Customize the Live Streaming dialog. Can be modified for a non-YouTube provider.
     // liveStreaming: {
@@ -548,19 +561,21 @@ var config = {
     // },
 
     // // Options for the recording limit notification.
-    // recordingLimit: {
+    recordingLimit: {
     //
     //    // The recording limit in minutes. Note: This number appears in the notification text
     //    // but doesn't enforce the actual recording time limit. This should be configured in
     //    // jibri!
     //    limit: 60,
+        limit: 240,
+
     //
     //    // The name of the app with unlimited recordings.
     //    appName: 'Unlimited recordings APP',
     //
     //    // The URL of the app with unlimited recordings.
     //    appURL: 'https://unlimited.recordings.app.com/',
-    // },
+    },
 
     // Disables or enables RTX (RFC 4588) (defaults to false).
     // disableRtx: false,
@@ -639,20 +654,26 @@ var config = {
     // },
 
     // Configs for the lobby screen.
-    // lobby: {
+    lobby: {
     //     // If Lobby is enabled, it starts knocking automatically. Replaces `autoKnockLobby`.
     //     autoKnock: false,
-    //     // Enables the lobby chat. Replaces `enableLobbyChat`.
-    //     enableChat: true,
-    // },
+        autoKnock: false,
+
+        //     // Enables the lobby chat. Replaces `enableLobbyChat`.
+        //     enableChat: true,
+        enableChat: true,
+    },
 
     // Configs for the security related UI elements.
-    // securityUi: {
+    securityUi: {
     //     // Hides the lobby button. Replaces `hideLobbyButton`.
     //     hideLobbyButton: false,
-    //     // Hides the possibility to set and enter a lobby password.
-    //     disableLobbyPassword: false,
-    // },
+        hideLobbyButton: false,
+
+        //     // Hides the possibility to set and enter a lobby password.
+        //     disableLobbyPassword: false,
+        disableLobbyPassword: false,
+    },
 
     // Disable app shortcuts that are registered upon joining a conference
     // disableShortcuts: false,
@@ -664,6 +685,7 @@ var config = {
     // Enabling the close page will ignore the welcome page redirection when
     // a call is hangup.
     // enableClosePage: false,
+    enableClosePage: true,
 
     // Disable hiding of remote thumbnails when in a 1-on-1 conference call.
     // Setting this to null, will also disable showing the remote videos
@@ -685,6 +707,7 @@ var config = {
     // Default language for the user interface. Cannot be overwritten.
     // DEPRECATED! Use the `lang` iframe option directly instead.
     // defaultLanguage: 'en',
+    defaultLanguage: 'ru',
 
     // Disables profile and the edit of all fields from the profile settings (display name and email)
     // disableProfile: false,
@@ -705,17 +728,22 @@ var config = {
     // enableCalendarIntegration: false,
 
     // Configs for prejoin page.
-    // prejoinConfig: {
+    prejoinConfig: {
     //     // When 'true', it shows an intermediate page before joining, where the user can configure their devices.
     //     // This replaces `prejoinPageEnabled`.
     //     enabled: true,
-    //     // Hides the participant name editing field in the prejoin screen.
-    //     // If requireDisplayName is also set as true, a name should still be provided through
-    //     // either the jwt or the userInfo from the iframe api init object in order for this to have an effect.
-    //     hideDisplayName: false,
-    //     // List of buttons to hide from the extra join options dropdown.
-    //     hideExtraJoinButtons: ['no-audio', 'by-phone'],
-    // },
+        enabled: true,
+
+        //     // Hides the participant name editing field in the prejoin screen.
+        //     // If requireDisplayName is also set as true, a name should still be provided through
+        //     // either the jwt or the userInfo from the iframe api init object in order for this to have an effect.
+        //     hideDisplayName: false,
+        hideDisplayName: false,
+
+        //     // List of buttons to hide from the extra join options dropdown.
+        //     hideExtraJoinButtons: ['no-audio', 'by-phone'],
+        hideExtraJoinButtons: [ 'no-audio' ],
+    },
 
     // When 'true', the user cannot edit the display name.
     // (Mainly useful when used in conjunction with the JWT so the JWT name becomes read only.)
@@ -917,6 +945,7 @@ var config = {
     // List of pre meeting screens buttons to hide. The values must be one or more of the 5 allowed buttons:
     // 'microphone', 'camera', 'select-background', 'invite', 'settings'
     // hiddenPremeetingButtons: [],
+    hiddenPremeetingButtons: [ 'invite' ],
 
     // An array with custom option buttons for the participant context menu
     // type:  Array<{ icon: string; id: string; text: string; }>
@@ -1189,7 +1218,7 @@ var config = {
     // For information about the properties of
     // deeplinking.[ios/android].dynamicLink check:
     // https://firebase.google.com/docs/dynamic-links/create-manually
-    // deeplinking: {
+    deeplinking: {
     //
     //     // The desktop deeplinking config.
     //     desktop: {
@@ -1198,25 +1227,26 @@ var config = {
     //     // If true, any checks to handoff to another application will be prevented
     //     // and instead the app will continue to display in the current browser.
     //     disabled: false,
+        disabled: true,
 
-    //     // whether to hide the logo on the deep linking pages.
-    //     hideLogo: false,
+        //     // whether to hide the logo on the deep linking pages.
+        //     hideLogo: false,
 
-    //     // The ios deeplinking config.
-    //     ios: {
-    //         appName: 'Jitsi Meet',
-    //         // Specify mobile app scheme for opening the app from the mobile browser.
-    //         appScheme: 'org.jitsi.meet',
-    //         // Custom URL for downloading ios mobile app.
-    //         downloadLink: 'https://itunes.apple.com/us/app/jitsi-meet/id1165103905',
-    //         dynamicLink: {
-    //             apn: 'org.jitsi.meet',
-    //             appCode: 'w2atb',
-    //             customDomain: undefined,
-    //             ibi: 'com.atlassian.JitsiMeet.ios',
-    //             isi: '1165103905'
-    //         }
-    //     },
+        //     // The ios deeplinking config.
+        //     ios: {
+        //         appName: 'Jitsi Meet',
+        //         // Specify mobile app scheme for opening the app from the mobile browser.
+        //         appScheme: 'org.jitsi.meet',
+        //         // Custom URL for downloading ios mobile app.
+        //         downloadLink: 'https://itunes.apple.com/us/app/jitsi-meet/id1165103905',
+        //         dynamicLink: {
+        //             apn: 'org.jitsi.meet',
+        //             appCode: 'w2atb',
+        //             customDomain: undefined,
+        //             ibi: 'com.atlassian.JitsiMeet.ios',
+        //             isi: '1165103905'
+        //         }
+        //     },
 
     //     // The android deeplinking config.
     //     android: {
@@ -1236,7 +1266,7 @@ var config = {
     //             isi: '1165103905'
     //         }
     //     }
-    // },
+    },
 
     // // The terms, privacy and help centre URL's.
     // legalUrls: {
@@ -1257,6 +1287,7 @@ var config = {
 
     // Disables all invite functions from the app (share, invite, dial out...etc)
     // disableInviteFunctions: true,
+    disableInviteFunctions: true,
 
     // Disables storing the room name to the recents list. When in an iframe this is ignored and
     // the room is never stored in the recents list.
@@ -1298,6 +1329,7 @@ var config = {
 
     // Enables support for lip-sync for this client (if the browser supports it).
     // enableLipSync: false,
+    enableLipSync: true,
 
     /**
      External API url used to receive branding specific information.
@@ -1364,6 +1396,7 @@ var config = {
     }
     */
     // dynamicBrandingUrl: '',
+    dynamicBrandingUrl: '/brand_config.js',
 
     // Options related to the participants pane.
     // participantsPane: {
@@ -1430,7 +1463,7 @@ var config = {
     // },
 
     // Hides the conference subject
-    // hideConferenceSubject: false,
+    hideConferenceSubject: true,
 
     // Hides the conference timer.
     // hideConferenceTimer: false,
@@ -1443,9 +1476,10 @@ var config = {
 
     // Sets the conference subject
     // subject: 'Conference Subject',
+    subject: 'Boomstream Conference',
 
     // Sets the conference local subject
-    // localSubject: 'Conference Local Subject',
+    localSubject: 'Boomstream Conference',
 
     // This property is related to the use case when jitsi-meet is used via the IFrame API. When the property is true
     // jitsi-meet will use the local storage of the host page instead of its own. This option is useful if the browser
@@ -1709,18 +1743,22 @@ var config = {
     // defaultLogoUrl: 'images/watermark.svg',
 
     // Settings for the Excalidraw whiteboard integration.
-    // whiteboard: {
+    whiteboard: {
     //     // Whether the feature is enabled or not.
     //     enabled: true,
-    //     // The server used to support whiteboard collaboration.
-    //     // https://github.com/jitsi/excalidraw-backend
-    //     collabServerBaseUrl: 'https://excalidraw-backend.example.com',
+        enabled: true,
+
+        //     // The server used to support whiteboard collaboration.
+        //     // https://github.com/jitsi/excalidraw-backend
+        //     collabServerBaseUrl: 'https://excalidraw-backend.example.com',
+        collabServerBaseUrl: 'https://conf-wb.boomstream.com',
+
     //     // The user access limit to the whiteboard, introduced as a means
     //     // to control the performance.
     //     userLimit: 25,
     //     // The url for more info about the whiteboard and its usage limitations.
     //     limitUrl: 'https://example.com/blog/whiteboard-limits,
-    // },
+    },
 
     // The watchRTC initialize config params as described :
     // https://testrtc.com/docs/installing-the-watchrtc-javascript-sdk/#h-set-up-the-sdk
