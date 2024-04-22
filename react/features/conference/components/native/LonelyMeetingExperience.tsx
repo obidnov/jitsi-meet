@@ -142,7 +142,7 @@ function _mapStateToProps(state: IReduxState) {
     const { disableInviteFunctions } = state['features/base/config'];
     const { conference } = state['features/base/conference'];
     const _inviteOthersControl = getInviteOthersControl(state);
-    const flag = getFeatureFlag(state, INVITE_ENABLED, true);
+    const flag = getFeatureFlag(state, INVITE_ENABLED, false);
     const _isAddPeopleFeatureEnabled = addPeopleFeatureControl(state);
     const _isInBreakoutRoom = isInBreakoutRoom(state);
 

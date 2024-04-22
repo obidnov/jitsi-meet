@@ -1511,6 +1511,7 @@ var config = {
     // If set, add a "Open shared document" link to the bottom right menu that
     // will open an etherpad document.
     // etherpad_base: 'https://your-etherpad-installati.on/p/',
+    etherpad_base: 'https://conf.boomstream.com/etherpad/p/',
 
     // To enable information about dial-in access to meetings you need to provide
     // dialInNumbersUrl and dialInConfCodeUrl.

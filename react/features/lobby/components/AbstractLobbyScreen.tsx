@@ -438,7 +438,7 @@ export default class AbstractLobbyScreen<P extends IProps = IProps> extends Pure
 export function _mapStateToProps(state: IReduxState) {
     const localParticipant = getLocalParticipant(state);
     const participantId = localParticipant?.id;
-    const inviteEnabledFlag = getFeatureFlag(state, INVITE_ENABLED, true);
+    const inviteEnabledFlag = getFeatureFlag(state, INVITE_ENABLED, false);
     const { disableInviteFunctions } = state['features/base/config'];
     const { isDisplayNameRequiredError, knocking, passwordJoinFailed } = state['features/lobby'];
     const { iAmSipGateway } = state['features/base/config'];
