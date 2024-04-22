@@ -72,7 +72,9 @@ MiddlewareRegistry.register(({ dispatch, getState }) => next => action => {
             // check for demote actor and update notification
             dispatch(showNotification(notificationParams, NOTIFICATION_TIMEOUT_TYPE.STICKY));
         } else {
-            dispatch(setVisitorsSupported(conference.isVisitorsSupported()));
+            if (conference.isVisitorsSupported != undefined && typeof conference.isVisitorsSupported == 'function') {
+                dispatch(setVisitorsSupported(conference.isVisitorsSupported()));
+            }
             conference.on(JitsiConferenceEvents.VISITORS_SUPPORTED_CHANGED, (value: boolean) => {
                 dispatch(setVisitorsSupported(value));
             });
