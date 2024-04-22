@@ -14,41 +14,41 @@ export const WHITEBOARD_ID = 'whiteboard';
 export const WHITEBOARD_UI_OPTIONS = {
     canvasActions: {
         allowedShapes: [
-            'arrow', 'diamond', 'ellipse', 'freedraw', 'line', 'rectangle', 'selection', 'text'
+            'arrow', 'diamond', 'ellipse', 'freedraw', 'line', 'rectangle', 'selection', 'text', 'image'
         ],
         allowedShortcuts: [
             'cut', 'deleteSelectedElements', 'redo', 'selectAll', 'undo'
         ],
-        disableAlignItems: true,
-        disableFileDrop: true,
-        disableGrouping: true,
-        disableHints: true,
-        disableLink: true,
-        disableShortcuts: true,
+        disableAlignItems: false,
+        disableFileDrop: false,
+        disableGrouping: false,
+        disableHints: false,
+        disableLink: false,
+        disableShortcuts: false,
         disableVerticalAlignOptions: true,
         fontSizeOptions: [ 's', 'm', 'l' ],
-        hideArrowHeadsOptions: true,
-        hideColorInput: true,
-        hideClearCanvas: true,
-        hideFontFamily: true,
+        hideArrowHeadsOptions: false,
+        hideColorInput: false,
+        hideClearCanvas: false,
+        hideFontFamily: false,
         hideHelpDialog: true,
-        hideIOActions: true,
-        hideLayers: true,
+        hideIOActions: false,
+        hideLayers: false,
         hideLibraries: true,
-        hideLockButton: true,
-        hideOpacityInput: true,
-        hideSharpness: true,
-        hideStrokeStyle: true,
-        hideTextAlign: true,
+        hideLockButton: false,
+        hideOpacityInput: false,
+        hideSharpness: false,
+        hideStrokeStyle: false,
+        hideTextAlign: false,
         hideThemeControls: true,
         hideUserList: true,
         saveAsImageOptions: {
-            defaultBackgroundValue: true,
+            defaultBackgroundValue: false,
             disableScale: true,
-            disableSelection: true,
-            disableClipboard: true,
+            disableSelection: false,
+            disableClipboard: false,
             disableSceneEmbed: true,
-            hideTheme: true
+            hideTheme: false
         }
     }
 };

@@ -14,6 +14,7 @@ import { SET_JWT } from './actionTypes';
 import { setJWT } from './actions';
 import { parseJWTFromURLParams } from './functions';
 import logger from './logger';
+import {parseURLParams} from "../util/parseURLParams";
 
 /**
  * Middleware to parse token data upon setting a new room URL.
@@ -50,11 +51,14 @@ MiddlewareRegistry.register(store => next => action => {
  */
 function _overwriteLocalParticipant(
         { dispatch, getState }: IStore,
-        { avatarURL, email, id: jwtId, name, features }:
-        { avatarURL?: string; email?: string; features?: any; id?: string; name?: string; }) {
+        { avatarURL, email, id: jwtId, name, features, isHidden }:
+        { avatarURL?: string; email?: string; features?: any; id?: string; name?: string; isHidden?:boolean; }) {
     let localParticipant;
 
-    if ((avatarURL || email || name || features) && (localParticipant = getLocalParticipant(getState))) {
+    if ((avatarURL || email || name || features || isHidden) && (localParticipant = getLocalParticipant(getState))) {
+
+        console.log('localParticipant: ', localParticipant)
+
         const newProperties: IParticipant = {
             id: localParticipant.id,
             local: true
@@ -75,6 +79,10 @@ function _overwriteLocalParticipant(
         if (features) {
             newProperties.features = features;
         }
+        if (isHidden) {
+            newProperties.isHidden = isHidden;
+        }
+
         dispatch(participantUpdated(newProperties));
     }
 }
@@ -100,9 +108,19 @@ function _setConfigOrLocationURL({ dispatch, getState }: IStore, next: Function,
 
     const { locationURL } = getState()['features/base/connection'];
 
-    dispatch(
-        setJWT(locationURL ? parseJWTFromURLParams(locationURL) : undefined));
-
+    if (1 && locationURL) {
+        const jwt = parseURLParams(locationURL, true, 'search').jwt;
+        if (jwt) {
+            fetch('/auth.html?jwt=' + jwt)
+                .then(response => response.json())
+                .then(json => {
+                    dispatch(setJWT(json.jwt))
+                })
+        }
+    } else {
+        dispatch(
+            setJWT(locationURL ? parseJWTFromURLParams(locationURL) : undefined));
+    }
     return result;
 }
 
@@ -158,6 +176,7 @@ function _setJWT(store: IStore, next: Function, action: AnyAction) {
                     if (context.user && context.user.role === 'visitor') {
                         action.preferVisitor = true;
                     }
+                    console.log('_setJWT', action)
                 } else if (jwtPayload.name || jwtPayload.picture || jwtPayload.email) {
                     // there are some tokens (firebase) having picture and name on the main level.
                     _overwriteLocalParticipant(store, {
@@ -236,13 +255,20 @@ function _undoOverwriteLocalParticipant(
  *     hidden-from-recorder: ?boolean
  * }}
  */
-function _user2participant({ avatar, avatarUrl, email, id, name, 'hidden-from-recorder': hiddenFromRecorder }:
-    { avatar?: string; avatarUrl?: string; email: string; 'hidden-from-recorder': string | boolean;
+function _user2participant({ avatar, avatarUrl, email, id, name,
+                               'hidden-from-recorder': hiddenFromRecorder,
+                               'hidden-from-ui': hiddenFromUI }:
+    { avatar?: string;
+        avatarUrl?: string;
+        email: string;
+        'hidden-from-recorder': string | boolean;
+        'hidden-from-ui': string | boolean;
     id: string; name: string; }) {
     const participant: {
         avatarURL?: string;
         email?: string;
         hiddenFromRecorder?: boolean;
+        isHidden?: boolean;
         id?: string;
         name?: string;
     } = {};
@@ -264,6 +290,10 @@ function _user2participant({ avatar, avatarUrl, email, id, name, 'hidden-from-re
 
     if (hiddenFromRecorder === 'true' || hiddenFromRecorder === true) {
         participant.hiddenFromRecorder = true;
+    }
+
+    if (hiddenFromUI === 'true' || hiddenFromUI === true) {
+        participant.isHidden = true;
     }
 
     return Object.keys(participant).length ? participant : undefined;

@@ -1671,6 +1671,16 @@ export default {
             // The logic shared between RN and web.
             commonUserJoinedHandling(APP.store, room, user);
 
+            const jwt = APP.store.getState()['features/base/jwt'];
+
+            console.log('JitsiConferenceEvents.USER_JOINED, jwt?.user:', jwt?.user);
+            console.log('JitsiConferenceEvents.USER_JOINED, user.isHidden():', user.isHidden());
+            console.log('JitsiConferenceEvents.USER_JOINED, user:', user);
+
+            if (jwt?.user?.isHidden) {
+                return;
+            }
+
             if (user.isHidden()) {
                 return;
             }
