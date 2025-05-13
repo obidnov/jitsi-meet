@@ -1,4 +1,4 @@
-import { throttle } from 'lodash';
+import { throttle } from 'lodash-es';
 
 import { IReduxState, IStore } from '../app/types';
 import { getParticipantCount } from '../base/participants/functions';
@@ -56,7 +56,6 @@ const checkToolboxOverlap = (clientHeight: number, store: IStore) => {
         const indicatorsRect = tile?.querySelector('.bottom-indicators')?.getBoundingClientRect();
 
         if (!indicatorsRect) {
-            // eslint-disable-next-line no-continue
             continue;
         }
 

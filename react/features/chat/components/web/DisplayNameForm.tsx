@@ -43,7 +43,7 @@ interface IState {
  * @augments Component
  */
 class DisplayNameForm extends Component<IProps, IState> {
-    state = {
+    override state = {
         displayName: ''
     };
 
@@ -68,7 +68,7 @@ class DisplayNameForm extends Component<IProps, IState> {
      * @inheritdoc
      * @returns {ReactElement}
      */
-    render() {
+    override render() {
         const { isPollsEnabled, t } = this.props;
 
         return (
@@ -117,7 +117,7 @@ class DisplayNameForm extends Component<IProps, IState> {
      * @returns {void}
      */
     _onSubmit(event: any) {
-        event?.preventDefault && event.preventDefault();
+        event?.preventDefault?.();
 
         // Store display name in settings
         this.props.dispatch(updateSettings({

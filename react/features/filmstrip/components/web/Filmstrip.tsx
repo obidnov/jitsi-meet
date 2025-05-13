@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import _ from 'lodash';
+import { throttle } from 'lodash-es';
 import React, { PureComponent } from 'react';
 import { WithTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
@@ -26,7 +26,7 @@ import {
     setUserFilmstripWidth,
     setUserIsResizing,
     setVisibleRemoteParticipants
-} from '../../actions';
+} from '../../actions.web';
 import {
     ASPECT_RATIO_BREAKPOINT,
     DEFAULT_FILMSTRIP_WIDTH,
@@ -39,10 +39,10 @@ import {
 } from '../../constants';
 import {
     getVerticalViewMaxWidth,
+    isFilmstripDisabled,
     isStageFilmstripTopPanel,
     shouldRemoteVideosBeVisible
-} from '../../functions';
-import { isFilmstripDisabled } from '../../functions.web';
+} from '../../functions.web';
 
 import AudioTracksContainer from './AudioTracksContainer';
 import Thumbnail from './Thumbnail';
@@ -286,7 +286,7 @@ class Filmstrip extends PureComponent <IProps, IState> {
         this._onDragMouseUp = this._onDragMouseUp.bind(this);
         this._onFilmstripResize = this._onFilmstripResize.bind(this);
 
-        this._throttledResize = _.throttle(
+        this._throttledResize = throttle(
             this._onFilmstripResize,
             50,
             {
@@ -300,7 +300,7 @@ class Filmstrip extends PureComponent <IProps, IState> {
      *
      * @inheritdoc
      */
-    componentDidMount() {
+    override componentDidMount() {
         this.props.dispatch(registerShortcut({
             character: 'F',
             helpDescription: 'keyboardShortcuts.toggleFilmstrip',
@@ -318,7 +318,7 @@ class Filmstrip extends PureComponent <IProps, IState> {
      *
      * @inheritdoc
      */
-    componentWillUnmount() {
+    override componentWillUnmount() {
         this.props.dispatch(unregisterShortcut('F'));
 
         document.removeEventListener('mouseup', this._onDragMouseUp);
@@ -333,7 +333,7 @@ class Filmstrip extends PureComponent <IProps, IState> {
      * @inheritdoc
      * @returns {ReactElement}
      */
-    render() {
+    override render() {
         const filmstripStyle: any = { };
         const {
             _currentLayout,

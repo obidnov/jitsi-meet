@@ -49,7 +49,7 @@ export class AbstractClosedCaptionButton
      * @protected
      * @returns {void}
      */
-    async _handleClick() {
+    override _handleClick() {
         const { _requestingSubtitles, dispatch } = this.props;
 
         sendAnalytics(createToolbarEvent('transcribing.ccButton',
@@ -57,7 +57,7 @@ export class AbstractClosedCaptionButton
                 'requesting_subtitles': Boolean(_requestingSubtitles)
             }));
 
-        const dialogShown = await dispatch(maybeShowPremiumFeatureDialog(MEET_FEATURES.RECORDING));
+        const dialogShown = dispatch(maybeShowPremiumFeatureDialog(MEET_FEATURES.RECORDING));
 
         if (!dialogShown) {
             this._handleClickOpenLanguageSelector();
@@ -71,7 +71,7 @@ export class AbstractClosedCaptionButton
      * @protected
      * @returns {boolean}
      */
-    _isDisabled() {
+    override _isDisabled() {
         return false;
     }
 
@@ -82,7 +82,7 @@ export class AbstractClosedCaptionButton
      * @protected
      * @returns {boolean}
      */
-    _isToggled() {
+    override _isToggled() {
         return this.props._requestingSubtitles;
     }
 }

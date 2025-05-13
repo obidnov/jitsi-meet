@@ -63,6 +63,10 @@ export function getParticipantAudioMediaState(participant: IParticipant | undefi
         muted: Boolean, state: IReduxState) {
     const dominantSpeaker = getDominantSpeakerParticipant(state);
 
+    if (participant?.isSilent) {
+        return MEDIA_STATE.NONE;
+    }
+
     if (muted) {
         if (isForceMuted(participant, MEDIA_TYPE.AUDIO, state)) {
             return MEDIA_STATE.FORCE_MUTED;
@@ -146,19 +150,20 @@ export function getQuickActionButtonType(
         state: IReduxState) {
     // handled only by moderators
     const isVideoForceMuted = isForceMuted(participant, MEDIA_TYPE.VIDEO, state);
+    const isParticipantSilent = participant?.isSilent || false;
 
     if (isLocalParticipantModerator(state)) {
-        if (!isAudioMuted) {
+        if (!isAudioMuted && !isParticipantSilent) {
             return QUICK_ACTION_BUTTON.MUTE;
         }
         if (!isVideoMuted) {
             return QUICK_ACTION_BUTTON.STOP_VIDEO;
         }
+        if (isSupported()(state) && !isParticipantSilent) {
+            return QUICK_ACTION_BUTTON.ASK_TO_UNMUTE;
+        }
         if (isVideoForceMuted) {
             return QUICK_ACTION_BUTTON.ALLOW_VIDEO;
-        }
-        if (isSupported()(state)) {
-            return QUICK_ACTION_BUTTON.ASK_TO_UNMUTE;
         }
     }
 
@@ -281,7 +286,7 @@ export const isMuteAllVisible = (state: IReduxState) => {
  * Returns true if renaming the currently joined breakout room is allowed and false otherwise.
  *
  * @param {IReduxState} state - The redux state.
- * @returns {boolean} - True if reanming the currently joined breakout room is allowed and false otherwise.
+ * @returns {boolean} - True if renaming the currently joined breakout room is allowed and false otherwise.
  */
 export function isCurrentRoomRenamable(state: IReduxState) {
     return isInBreakoutRoom(state) && isBreakoutRoomRenameAllowed(state);

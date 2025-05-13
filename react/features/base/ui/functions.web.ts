@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { adaptV4Theme, createTheme } from '@mui/material/styles';
+import { Theme, adaptV4Theme, createTheme } from '@mui/material/styles';
 
 import { ITypography, IPalette as Palette1 } from '../ui/types';
 
@@ -16,7 +16,6 @@ declare module '@mui/material/styles' {
 interface ThemeProps {
     breakpoints: Object;
     colorMap: Object;
-    colors: Object;
     font: Object;
     shape: Object;
     spacing: Array<number>;
@@ -29,10 +28,10 @@ interface ThemeProps {
  * @param {Object} arg - The ui tokens.
  * @returns {Object}
  */
-export function createWebTheme({ font, colors, colorMap, shape, spacing, typography, breakpoints }: ThemeProps) {
+export function createWebTheme({ font, colorMap, shape, spacing, typography, breakpoints }: ThemeProps) {
     return createTheme(adaptV4Theme({
         spacing,
-        palette: createColorTokens(colorMap, colors),
+        palette: createColorTokens(colorMap),
         shape,
         typography: {
             // @ts-ignore
@@ -106,4 +105,15 @@ export function operatesWithEnterKey(element: Element): boolean {
     }
 
     return false;
+}
+
+/**
+ * Returns a common spacing from the bottom of the page for floating elements over the video space.
+ *
+ * @param {Theme} theme - The current theme.
+ * @param {boolean} isToolbarVisible - Whether the toolbar is visible or not.
+ * @returns {number}
+ */
+export function getVideospaceFloatingElementsBottomSpacing(theme: Theme, isToolbarVisible: boolean) {
+    return parseInt(isToolbarVisible ? theme.spacing(12) : theme.spacing(6), 10);
 }

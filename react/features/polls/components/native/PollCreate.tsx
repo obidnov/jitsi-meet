@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, Platform, View, ViewStyle } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import { FlatList, Platform, TextInput, View, ViewStyle } from 'react-native';
 import { Divider } from 'react-native-paper';
 import { useDispatch } from 'react-redux';
 
@@ -46,7 +45,9 @@ const PollCreate = (props: AbstractProps) => {
 
     useEffect(() => {
         answerInputs.current = answerInputs.current.slice(0, answers.length);
-
+        setTimeout(() => {
+            answerListRef.current?.scrollToEnd({ animated: true });
+        }, 1000);
     }, [ answers ]);
 
     /*
@@ -88,6 +89,7 @@ const PollCreate = (props: AbstractProps) => {
     /* eslint-disable react/no-multi-comp */
     const createRemoveOptionButton = (onPress: () => void) => (
         <Button
+            id = { t('polls.create.removeOption') }
             labelKey = 'polls.create.removeOption'
             labelStyle = { dialogStyles.optionRemoveButtonText }
             onClick = { onPress }
@@ -108,6 +110,7 @@ const PollCreate = (props: AbstractProps) => {
 
         return (
             <View
+                id = 'option-container'
                 style = { dialogStyles.optionContainer as ViewStyle }>
                 <Input
                     blurOnSubmit = { false }
@@ -143,6 +146,7 @@ const PollCreate = (props: AbstractProps) => {
                 autoFocus = { true }
                 blurOnSubmit = { false }
                 customStyles = {{ container: dialogStyles.customContainer }}
+                id = { t('polls.create.pollQuestion') }
                 label = { t('polls.create.pollQuestion') }
                 maxLength = { CHAR_LIMIT }
                 onChange = { setQuestion }
@@ -170,6 +174,7 @@ const PollCreate = (props: AbstractProps) => {
                     <Button
                         accessibilityLabel = 'polls.create.addOption'
                         disabled = { answers.length >= ANSWERS_LIMIT }
+                        id = { t('polls.create.addOption') }
                         labelKey = 'polls.create.addOption'
                         onClick = { () => {
                             // adding and answer
@@ -182,6 +187,7 @@ const PollCreate = (props: AbstractProps) => {
                         style = { pollsStyles.buttonRow as ViewStyle }>
                         <Button
                             accessibilityLabel = 'polls.create.cancel'
+                            id = { t('polls.create.cancel') }
                             labelKey = 'polls.create.cancel'
                             onClick = { () => {
                                 setCreateMode(false);
@@ -194,6 +200,7 @@ const PollCreate = (props: AbstractProps) => {
                         <Button
                             accessibilityLabel = 'polls.create.save'
                             disabled = { isSubmitDisabled }
+                            id = { t('polls.create.save') }
                             labelKey = 'polls.create.save'
                             onClick = { onSubmit }
                             style = { pollsStyles.pollCreateButton }

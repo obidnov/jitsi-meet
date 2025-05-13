@@ -1,4 +1,4 @@
-/* eslint-disable guard-for-in, no-continue */
+/* eslint-disable guard-for-in */
 /* global __dirname */
 
 const fs = require('fs');
@@ -21,11 +21,6 @@ function updateDependencies() {
 
     for (const key in RNSDKpackageJSON.peerDependencies) {
         if (!packageJSON.dependencies.hasOwnProperty(key)) {
-
-            if (packageJSON.devDependencies.hasOwnProperty('@react-native/metro-config')) {
-                continue;
-            }
-
             packageJSON.dependencies[key] = RNSDKpackageJSON.peerDependencies[key];
             updated = true;
         }

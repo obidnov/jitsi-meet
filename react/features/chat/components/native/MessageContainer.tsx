@@ -39,7 +39,7 @@ class MessageContainer extends AbstractMessageContainer<IProps, any> {
      *
      * @inheritdoc
      */
-    render() {
+    override render() {
         const data = this._getMessagesGroupedBySender();
 
         return (
@@ -78,7 +78,9 @@ class MessageContainer extends AbstractMessageContainer<IProps, any> {
         const { t } = this.props;
 
         return (
-            <View style = { styles.emptyComponentWrapper as ViewStyle }>
+            <View
+                id = 'no-messages-message'
+                style = { styles.emptyComponentWrapper as ViewStyle }>
                 <Text style = { styles.emptyComponentText as TextStyle }>
                     { t('chat.noMessagesMessage') }
                 </Text>

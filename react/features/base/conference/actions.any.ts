@@ -1,6 +1,7 @@
 import { createStartMutedConfigurationEvent } from '../../analytics/AnalyticsEvents';
 import { sendAnalytics } from '../../analytics/functions';
 import { IReduxState, IStore } from '../../app/types';
+import { transcriberJoined, transcriberLeft } from '../../transcribing/actions';
 import { setIAmVisitor } from '../../visitors/actions';
 import { iAmVisitor } from '../../visitors/functions';
 import { overwriteConfig } from '../config/actions';
@@ -8,7 +9,7 @@ import { getReplaceParticipant } from '../config/functions';
 import { connect, disconnect, hangup } from '../connection/actions';
 import { JITSI_CONNECTION_CONFERENCE_KEY } from '../connection/constants';
 import { hasAvailableDevices } from '../devices/functions.any';
-import { JitsiConferenceEvents, JitsiE2ePingEvents } from '../lib-jitsi-meet';
+import JitsiMeetJS, { JitsiConferenceEvents, JitsiE2ePingEvents } from '../lib-jitsi-meet';
 import {
     setAudioMuted,
     setAudioUnmutePermissions,
@@ -25,7 +26,7 @@ import {
     participantSourcesUpdated,
     participantUpdated
 } from '../participants/actions';
-import { getNormalizedDisplayName } from '../participants/functions';
+import { getNormalizedDisplayName, getParticipantByIdOrUndefined } from '../participants/functions';
 import { IJitsiParticipant } from '../participants/types';
 import { toState } from '../redux/functions';
 import {
@@ -44,6 +45,7 @@ import {
     CONFERENCE_JOIN_IN_PROGRESS,
     CONFERENCE_LEFT,
     CONFERENCE_LOCAL_SUBJECT_CHANGED,
+    CONFERENCE_PROPERTIES_CHANGED,
     CONFERENCE_SUBJECT_CHANGED,
     CONFERENCE_TIMESTAMP_CHANGED,
     CONFERENCE_UNIQUE_ID_SET,
@@ -61,6 +63,7 @@ import {
     SEND_TONES,
     SET_ASSUMED_BANDWIDTH_BPS,
     SET_FOLLOW_ME,
+    SET_FOLLOW_ME_RECORDER,
     SET_OBFUSCATED_ROOM,
     SET_PASSWORD,
     SET_PASSWORD_FAILED,
@@ -154,6 +157,10 @@ function _addConferenceListeners(conference: IJitsiConference, dispatch: IStore[
         JitsiConferenceEvents.LOCK_STATE_CHANGED,
         (locked: boolean) => dispatch(lockStateChanged(conference, locked)));
 
+    conference.on(
+        JitsiConferenceEvents.PROPERTIES_CHANGED,
+        (properties: Object) => dispatch(conferencePropertiesChanged(properties)));
+
     // Dispatches into features/base/media follow:
 
     conference.on(
@@ -229,6 +236,14 @@ function _addConferenceListeners(conference: IJitsiConference, dispatch: IStore[
         })));
 
     conference.on(
+        JitsiConferenceEvents.SILENT_STATUS_CHANGED,
+        (id: string, isSilent: boolean) => dispatch(participantUpdated({
+            conference,
+            id,
+            isSilent
+        })));
+
+    conference.on(
         JitsiConferenceEvents.DOMINANT_SPEAKER_CHANGED,
         (dominant: string, previous: string[], silence: boolean | string) => {
             dispatch(dominantSpeakerChanged(dominant, previous, Boolean(silence), conference));
@@ -267,13 +282,30 @@ function _addConferenceListeners(conference: IJitsiConference, dispatch: IStore[
             botType
         })));
 
+    conference.on(
+        JitsiConferenceEvents.TRANSCRIPTION_STATUS_CHANGED,
+        (status: string, id: string, abruptly: boolean) => {
+            if (status === JitsiMeetJS.constants.transcriptionStatus.ON) {
+                dispatch(transcriberJoined(id));
+            } else if (status === JitsiMeetJS.constants.transcriptionStatus.OFF) {
+                dispatch(transcriberLeft(id, abruptly));
+            }
+        });
+
     conference.addCommandListener(
         AVATAR_URL_COMMAND,
-        (data: { value: string; }, id: string) => dispatch(participantUpdated({
-            conference,
-            id,
-            avatarURL: data.value
-        })));
+        (data: { value: string; }, id: string) => {
+            const participant = getParticipantByIdOrUndefined(state, id);
+
+            // if already set from presence(jwt), skip the command processing
+            if (!participant?.avatarURL) {
+                return dispatch(participantUpdated({
+                    conference,
+                    id,
+                    avatarURL: data.value
+                }));
+            }
+        });
     conference.addCommandListener(
         EMAIL_COMMAND,
         (data: { value: string; }, id: string) => dispatch(participantUpdated({
@@ -421,6 +453,23 @@ export function conferenceLeft(conference?: IJitsiConference) {
         conference
     };
 }
+
+/**
+ * Signals that the conference properties have been changed.
+ *
+ * @param {Object} properties - The new properties set.
+ * @returns {{
+ *     type: CONFERENCE_PROPERTIES_CHANGED,
+ *     properties: Object
+ * }}
+ */
+export function conferencePropertiesChanged(properties: object) {
+    return {
+        type: CONFERENCE_PROPERTIES_CHANGED,
+        properties
+    };
+}
+
 
 /**
  * Signals that the conference subject has been changed.
@@ -833,6 +882,22 @@ export function setFollowMe(enabled: boolean) {
 }
 
 /**
+ * Enables or disables the Follow Me feature used only for the recorder.
+ *
+ * @param {boolean} enabled - Whether Follow Me should be enabled and used only by the recorder.
+ * @returns {{
+ *     type: SET_FOLLOW_ME_RECORDER,
+ *     enabled: boolean
+ * }}
+ */
+export function setFollowMeRecorder(enabled: boolean) {
+    return {
+        type: SET_FOLLOW_ME_RECORDER,
+        enabled
+    };
+}
+
+/**
  * Enables or disables the Mute reaction sounds feature.
  *
  * @param {boolean} muted - Whether or not reaction sounds should be muted for all participants.
@@ -867,7 +932,7 @@ export function setPassword(
         password?: string) {
     return (dispatch: IStore['dispatch'], getState: IStore['getState']) => {
         if (!conference) {
-            return;
+            return Promise.reject();
         }
         switch (method) {
         case conference.join: {
@@ -973,7 +1038,7 @@ export function setStartMutedPolicy(
             video: startVideoMuted
         });
 
-        return dispatch(
+        dispatch(
             onStartMutedPolicyChanged(startAudioMuted, startVideoMuted));
     };
 }
@@ -1050,14 +1115,21 @@ export function redirect(vnode: string, focusJid: string, username: string) {
             return;
         }
 
-        dispatch(overwriteConfig(newConfig)) // @ts-ignore
-            .then(() => dispatch(disconnect(true)))
-            .then(() => dispatch(setIAmVisitor(Boolean(vnode))))
+        dispatch(overwriteConfig(newConfig));
 
-            // we do not clear local tracks on error, so we need to manually clear them
-            .then(() => dispatch(destroyLocalTracks()))
-            .then(() => dispatch(conferenceWillInit()))
-            .then(() => dispatch(connect()))
+        dispatch(disconnect(true))
+            .then(() => {
+                dispatch(setIAmVisitor(Boolean(vnode)));
+
+                // we do not clear local tracks on error, so we need to manually clear them
+                return dispatch(destroyLocalTracks());
+            })
+            .then(() => {
+                dispatch(conferenceWillInit());
+                logger.info(`Dispatching connect from redirect (visitor = ${Boolean(vnode)}).`);
+
+                return dispatch(connect());
+            })
             .then(() => {
                 const media: Array<MediaType> = [];
 

@@ -4,6 +4,12 @@ import BaseTheme from '../../../base/ui/components/BaseTheme.native';
 
 export const dialogStyles = createStyleSheet({
 
+    headerContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+
     customContainer: {
         marginBottom: BaseTheme.spacing[3],
         marginHorizontal: BaseTheme.spacing[3],
@@ -158,13 +164,11 @@ export const pollsStyles = createStyleSheet({
     },
 
     pollSendLabel: {
-        color: BaseTheme.palette.text01,
-        textTransform: 'capitalize'
+        color: BaseTheme.palette.text01
     },
 
     pollSendDisabledLabel: {
-        color: BaseTheme.palette.text03,
-        textTransform: 'capitalize'
+        color: BaseTheme.palette.text03
     },
 
     buttonRow: {

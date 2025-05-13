@@ -79,7 +79,7 @@ export interface IProps extends AbstractDialogTabProps, WithTranslation {
     showPrejoinSettings: boolean;
 
     /**
-     * Wether or not the stage filmstrip is enabled.
+     * Whether or not the stage filmstrip is enabled.
      */
     stageFilmstripEnabled: boolean;
 }
@@ -135,7 +135,7 @@ class MoreTab extends AbstractDialogTab<IProps, any> {
      * @inheritdoc
      * @returns {ReactElement}
      */
-    render() {
+    override render() {
         const {
             showPrejoinSettings,
             disableHideSelfView,

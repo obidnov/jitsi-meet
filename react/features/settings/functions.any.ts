@@ -9,7 +9,7 @@ import { toState } from '../base/redux/functions';
 import { getHideSelfView } from '../base/settings/functions.any';
 import { parseStandardURIString } from '../base/util/uri';
 import { isStageFilmstripEnabled } from '../filmstrip/functions';
-import { isFollowMeActive } from '../follow-me/functions';
+import { isFollowMeActive, isFollowMeRecorderActive } from '../follow-me/functions';
 import { isPrejoinEnabledInConfig } from '../prejoin/functions';
 import { isReactionsEnabled } from '../reactions/functions.any';
 import { iAmVisitor } from '../visitors/functions';
@@ -133,20 +133,28 @@ export function getModeratorTabProps(stateful: IStateful) {
     const {
         conference,
         followMeEnabled,
+        followMeRecorderEnabled,
         startAudioMutedPolicy,
         startVideoMutedPolicy,
         startReactionsMuted
     } = state['features/base/conference'];
+    const { groupChatWithPermissions } = state['features/chat'];
     const { disableReactionsModeration } = state['features/base/config'];
     const followMeActive = isFollowMeActive(state);
+    const followMeRecorderActive = isFollowMeRecorderActive(state);
     const showModeratorSettings = shouldShowModeratorSettings(state);
+    const disableChatWithPermissions = !conference?.getMetadataHandler().getMetadata().allownersEnabled;
 
     // The settings sections to display.
     return {
+        chatWithPermissionsEnabled: Boolean(groupChatWithPermissions),
         showModeratorSettings: Boolean(conference && showModeratorSettings),
+        disableChatWithPermissions: Boolean(disableChatWithPermissions),
         disableReactionsModeration: Boolean(disableReactionsModeration),
         followMeActive: Boolean(conference && followMeActive),
         followMeEnabled: Boolean(conference && followMeEnabled),
+        followMeRecorderActive: Boolean(conference && followMeRecorderActive),
+        followMeRecorderEnabled: Boolean(conference && followMeRecorderEnabled),
         startReactionsMuted: Boolean(conference && startReactionsMuted),
         startAudioMuted: Boolean(conference && startAudioMutedPolicy),
         startVideoMuted: Boolean(conference && startVideoMutedPolicy)

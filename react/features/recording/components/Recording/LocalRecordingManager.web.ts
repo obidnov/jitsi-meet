@@ -6,7 +6,7 @@ import { IStore } from '../../../app/types';
 import { getRoomName } from '../../../base/conference/functions';
 import { MEDIA_TYPE } from '../../../base/media/constants';
 import { getLocalTrack, getTrackState } from '../../../base/tracks/functions';
-import { inIframe } from '../../../base/util/iframeUtils';
+import { isEmbedded } from '../../../base/util/embedUtils';
 import { stopLocalVideoRecording } from '../../actions.any';
 
 interface ISelfRecording {
@@ -28,7 +28,7 @@ interface ILocalRecordingManager {
     roomName: string;
     saveRecording: (recordingData: Blob[], filename: string) => void;
     selfRecording: ISelfRecording;
-    startLocalRecording: (store: IStore, onlySelf: boolean) => void;
+    startLocalRecording: (store: IStore, onlySelf: boolean) => Promise<void>;
     stopLocalRecording: () => void;
     stream: MediaStream | undefined;
     totalSize: number;
@@ -180,7 +180,7 @@ const LocalRecordingManager: ILocalRecordingManager = {
         const { dispatch, getState } = store;
 
         // @ts-ignore
-        const supportsCaptureHandle = Boolean(navigator.mediaDevices.setCaptureHandleConfig) && !inIframe();
+        const supportsCaptureHandle = Boolean(navigator.mediaDevices.setCaptureHandleConfig) && !isEmbedded();
         const tabId = uuidV4();
 
         this.selfRecording.on = onlySelf;
