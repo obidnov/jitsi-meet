@@ -17,6 +17,7 @@ import { setJWT } from './actions';
 import { parseJWTFromURLParams } from './functions';
 import logger from './logger';
 import {parseURLParams} from "../util/parseURLParams";
+import {setLocalSubject} from "../conference/actions.any";
 
 /**
  * Middleware to parse token data upon setting a new room URL.
@@ -110,7 +111,7 @@ function _setConfigOrLocationURL({ dispatch, getState }: IStore, next: Function,
 
     const { locationURL } = getState()['features/base/connection'];
 
-    if (1 && locationURL) {
+    if (action.type == SET_LOCATION_URL && locationURL) {
         const jwt = parseURLParams(locationURL, true, 'search').jwt;
         if (jwt) {
             fetch('/auth.html?jwt=' + jwt)
@@ -164,6 +165,7 @@ function _setJWT(store: IStore, next: Function, action: AnyAction) {
                 if (context) {
                     const user = _user2participant(context.user || {});
 
+                    console.log('jwt user', context);
                     action.callee = context.callee;
                     action.group = context.group;
                     action.server = context.server;
@@ -192,6 +194,10 @@ function _setJWT(store: IStore, next: Function, action: AnyAction) {
                     // eslint-disable-next-line max-depth
                     if (context.user && context.user.role === 'visitor') {
                         action.preferVisitor = true;
+                    }
+                    if (context.callee && context.callee.name) {
+                        store.dispatch(setLocalSubject(context.callee.name));
+                        document.title = `${context.callee.name} | ${interfaceConfig.APP_NAME}`;
                     }
                     console.log('_setJWT', action)
                 } else if (jwtPayload.name || jwtPayload.picture || jwtPayload.email) {
@@ -272,16 +278,18 @@ function _undoOverwriteLocalParticipant(
  *     hidden-from-recorder: ?boolean
  * }}
  */
-function _user2participant({ avatar, avatarUrl, email, id, name,
+function _user2participant({ role, avatar, avatarUrl, email, id, name,
                                'hidden-from-recorder': hiddenFromRecorder,
                                'hidden-from-ui': hiddenFromUI }:
-    { avatar?: string;
+    { role?:string;
+        avatar?: string;
         avatarUrl?: string;
         email: string;
         'hidden-from-recorder': string | boolean;
         'hidden-from-ui': string | boolean;
     id: string; name: string; }) {
     const participant: {
+        role?: string;
         avatarURL?: string;
         email?: string;
         hiddenFromRecorder?: boolean;
@@ -303,6 +311,10 @@ function _user2participant({ avatar, avatarUrl, email, id, name,
     }
     if (typeof name === 'string') {
         participant.name = name.trim();
+    }
+
+    if (typeof role === 'string') {
+        participant.role = role.trim();
     }
 
     if (hiddenFromRecorder === 'true' || hiddenFromRecorder === true) {

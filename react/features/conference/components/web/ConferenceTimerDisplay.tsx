@@ -3,6 +3,7 @@ import { makeStyles } from 'tss-react/mui';
 
 import { withPixelLineHeight } from '../../../base/styles/functions.web';
 import { IDisplayProps } from '../ConferenceTimer';
+import {isAlwaysOnTitleBarEmpty, isTimerAlone} from "../functions.web";
 
 const useStyles = makeStyles()(theme => {
     return {
@@ -14,6 +15,20 @@ const useStyles = makeStyles()(theme => {
             boxSizing: 'border-box',
             height: '28px',
             borderRadius: `0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0`,
+            marginRight: '2px',
+
+            '@media (max-width: 300px)': {
+                display: 'none'
+            }
+        },
+        timerOne: {
+            ...withPixelLineHeight(theme.typography.labelRegular),
+            color: theme.palette.text01,
+            padding: '6px 8px',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            boxSizing: 'border-box',
+            height: '28px',
+            borderRadius: `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
             marginRight: '2px',
 
             '@media (max-width: 300px)': {
@@ -32,6 +47,6 @@ export default function ConferenceTimerDisplay({ timerValue, textStyle: _textSty
     const { classes } = useStyles();
 
     return (
-        <span className = { classes.timer }>{ timerValue }</span>
+        <span className = { isTimerAlone() ? classes.timerOne : classes.timer }>{ timerValue }</span>
     );
 }
