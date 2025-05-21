@@ -142,7 +142,7 @@ import { openLeaveReasonDialog } from './react/features/conference/actions.web';
 import { showDesktopPicker } from './react/features/desktop-picker/actions';
 import { appendSuffix } from './react/features/display-name/functions';
 import { maybeOpenFeedbackDialog, submitFeedback } from './react/features/feedback/actions';
-import { maybeSetLobbyChatMessageListener } from './react/features/lobby/actions.any';
+import {maybeSetLobbyChatMessageListener, toggleLobbyMode} from './react/features/lobby/actions.any';
 import { setNoiseSuppressionEnabled } from './react/features/noise-suppression/actions';
 import {
     hideNotification,
@@ -1563,6 +1563,14 @@ export default {
 
                 if (role === 'moderator') {
                     APP.store.dispatch(maybeSetLobbyChatMessageListener());
+
+                    const jwt = APP.store.getState()['features/base/jwt'];
+
+                    console.log('JitsiConferenceEvents.USER_ROLE_CHANGED, jwt', jwt);
+
+                    if (jwt?.callee?.lobby) {
+                        APP.store.dispatch(toggleLobbyMode(true));
+                    }
                 }
 
                 APP.store.dispatch(localParticipantRoleChanged(role));

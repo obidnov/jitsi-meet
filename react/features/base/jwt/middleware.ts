@@ -165,7 +165,6 @@ function _setJWT(store: IStore, next: Function, action: AnyAction) {
                 if (context) {
                     const user = _user2participant(context.user || {});
 
-                    console.log('jwt user', context);
                     action.callee = context.callee;
                     action.group = context.group;
                     action.server = context.server;
