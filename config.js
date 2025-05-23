@@ -422,7 +422,7 @@ var config = {
         //     hideStorageWarning: false,
         hideStorageWarning: false,
     },
-    hiddenDomain: 'recorder.meet.jitsi',
+    hiddenDomain: 'hidden.meet.jitsi',
 
     // DEPRECATED. Use recordingService.enabled instead.
     // fileRecordingsServiceEnabled: false,
