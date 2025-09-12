@@ -21,14 +21,15 @@ import SecurityDialog from '../pageobjects/SecurityDialog';
 import SettingsDialog from '../pageobjects/SettingsDialog';
 import Toolbar from '../pageobjects/Toolbar';
 import VideoQualityDialog from '../pageobjects/VideoQualityDialog';
+import Visitors from '../pageobjects/Visitors';
 
 import { LOG_PREFIX, logInfo } from './browserLogger';
 import { IContext, IJoinOptions } from './types';
 
-export const P1_DISPLAY_NAME = 'p1';
-export const P2_DISPLAY_NAME = 'p2';
-export const P3_DISPLAY_NAME = 'p3';
-export const P4_DISPLAY_NAME = 'p4';
+export const P1 = 'p1';
+export const P2 = 'p2';
+export const P3 = 'p3';
+export const P4 = 'p4';
 
 interface IWaitForSendReceiveDataOptions {
     checkReceive?: boolean;
@@ -47,7 +48,6 @@ export class Participant {
      * @private
      */
     private _name: string;
-    private _displayName: string;
     private _endpointId: string;
     private _jwt?: string;
 
@@ -165,13 +165,6 @@ export class Participant {
     }
 
     /**
-     * The name.
-     */
-    get displayName() {
-        return this._displayName || this.name;
-    }
-
-    /**
      * Adds a log to the participants log file.
      *
      * @param {string} message - The message to log.
@@ -203,7 +196,7 @@ export class Participant {
         if (!options.skipDisplayName) {
             // @ts-ignore
             config.userInfo = {
-                displayName: this._displayName = options.displayName || this._name
+                displayName: this._name
             };
         }
 
@@ -228,6 +221,10 @@ export class Participant {
         }
         if (this._jwt) {
             url = `${url}&jwt="${this._jwt}"`;
+        }
+
+        if (options.baseUrl) {
+            this.driver.options.baseUrl = options.baseUrl;
         }
 
         await this.driver.setTimeout({ 'pageLoad': 30000 });
@@ -299,11 +296,15 @@ export class Participant {
     /**
      * Waits for the page to load.
      *
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
-    async waitForPageToLoad(): Promise<void> {
+    async waitForPageToLoad(): Promise<boolean> {
         return this.driver.waitUntil(
-            () => this.execute(() => document.readyState === 'complete'),
+            () => this.execute(() => {
+                console.log(`${new Date().toISOString()} document.readyState: ${document.readyState}`);
+
+                return document.readyState === 'complete';
+            }),
             {
                 timeout: 30_000, // 30 seconds
                 timeoutMsg: `Timeout waiting for Page Load Request to complete for ${this.name}.`
@@ -371,9 +372,9 @@ export class Participant {
     /**
      * Waits for ICE to get connected.
      *
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
-    waitForIceConnected(): Promise<void> {
+    waitForIceConnected(): Promise<boolean> {
         return this.driver.waitUntil(() =>
             this.execute(() => APP?.conference?.getConnectionState() === 'connected'), {
             timeout: 15_000,
@@ -384,9 +385,9 @@ export class Participant {
     /**
      * Waits for ICE to get connected on the p2p connection.
      *
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
-    waitForP2PIceConnected(): Promise<void> {
+    waitForP2PIceConnected(): Promise<boolean> {
         return this.driver.waitUntil(() =>
             this.execute(() => APP?.conference?.getP2PConnectionState() === 'connected'), {
             timeout: 15_000,
@@ -399,16 +400,16 @@ export class Participant {
      *
      * @param {Object} options
      * @param {boolean} options.checkSend - If true we will chec
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
     waitForSendReceiveData({
         checkSend = true,
         checkReceive = true,
         timeout = 15_000,
         msg
-    } = {} as IWaitForSendReceiveDataOptions): Promise<void> {
+    } = {} as IWaitForSendReceiveDataOptions): Promise<boolean> {
         if (!checkSend && !checkReceive) {
-            return Promise.resolve();
+            return Promise.resolve(true);
         }
 
         const lMsg = msg ?? `expected to ${
@@ -433,9 +434,9 @@ export class Participant {
      * Waits for remote streams.
      *
      * @param {number} number - The number of remote streams to wait for.
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
-    async waitForRemoteStreams(number: number): Promise<void> {
+    async waitForRemoteStreams(number: number): Promise<boolean> {
         return await this.driver.waitUntil(async () => await this.execute(
             count => (APP?.conference?.getNumberOfParticipantsWithTracks() ?? -1) >= count,
             number
@@ -450,9 +451,9 @@ export class Participant {
      *
      * @param {number} number - The number of participant to wait for.
      * @param {string} msg - A custom message to use.
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
-    waitForParticipants(number: number, msg?: string): Promise<void> {
+    waitForParticipants(number: number, msg?: string): Promise<boolean> {
         return this.driver.waitUntil(
             () => this.execute(count => (APP?.conference?.listMembers()?.length ?? -1) === count, number),
             {
@@ -576,6 +577,16 @@ export class Participant {
     getLobbyScreen(): LobbyScreen {
         return new LobbyScreen(this);
     }
+
+    /**
+     * Returns the Visitors page object.
+     *
+     * @returns {Visitors}
+     */
+    getVisitors(): Visitors {
+        return new Visitors(this);
+    }
+
 
     /**
      * Switches to the iframe API context
@@ -756,8 +767,7 @@ export class Participant {
     /**
      * Returns the audio level for a participant.
      *
-     * @param observer
-     * @param participant
+     * @param p
      * @return
      */
     async getRemoteAudioLevel(p: Participant) {
@@ -818,15 +828,11 @@ export class Participant {
             // When testing for muted we don't want to have
             // the condition succeeded
             if (muted) {
-                const name = await testee.displayName;
-
-                assert.fail(`There was some sound coming from muted: '${name}'`);
+                assert.fail(`There was some sound coming from muted: '${this.name}'`);
             } // else we're good for unmuted participant
         } catch (_timeoutE) {
             if (!muted) {
-                const name = await testee.displayName;
-
-                assert.fail(`There was no sound from unmuted: '${name}'`);
+                assert.fail(`There was no sound from unmuted: '${this.name}'`);
             } // else we're good for muted participant
         }
     }
@@ -844,7 +850,7 @@ export class Participant {
                     endpointId) && !await this.driver.$(
                     `//span[@id="participant_${endpointId}" and contains(@class, "display-video")]`).isExisting(), {
                 timeout: 15_000,
-                timeoutMsg: `expected remote video for ${endpointId} to not be received 15s by ${this.displayName}`
+                timeoutMsg: `expected remote video for ${endpointId} to not be received 15s by ${this.name}`
             });
         } else {
             await this.driver.waitUntil(async () =>
@@ -852,7 +858,7 @@ export class Participant {
                     endpointId) && await this.driver.$(
                     `//span[@id="participant_${endpointId}" and contains(@class, "display-video")]`).isExisting(), {
                 timeout: 15_000,
-                timeoutMsg: `expected remote video for ${endpointId} to be received 15s by ${this.displayName}`
+                timeoutMsg: `expected remote video for ${endpointId} to be received 15s by ${this.name}`
             });
         }
     }
@@ -872,7 +878,7 @@ export class Participant {
             await this.driver.$('//span[contains(@class,"videocontainer")]//span[contains(@class,"connection_ninja")]')
                 .waitForDisplayed({
                     timeout: 5_000,
-                    timeoutMsg: `expected ninja icon to be displayed in 5s by ${this.displayName}`
+                    timeoutMsg: `expected ninja icon to be displayed in 5s by ${this.name}`
                 });
         }
     }
